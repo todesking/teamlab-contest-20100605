@@ -21,6 +21,7 @@ Net::HTTP.start(SERVER) {|h|
   last_ok=nil
   last_ok_time=Time.now.to_f
   last_time=Time.now.to_f
+  last_est=0
   speed=nil
   while(true)
     puts 'est: '+est.to_s
@@ -32,24 +33,34 @@ Net::HTTP.start(SERVER) {|h|
       puts '>>>>>>>>>>>>>>>>>>>>>BIG'
       hist.push :big
       bigs+=1
-      if smalls>0
-        est+=1
-      elsif bigs>3
+      if smalls>2
         est+=0
+      elsif bigs>4
+        est+=0
+      elsif bigs>2
+        est-=1
       else
-        est+=0
+        est-=1
       end
       smalls=0
+      est=last_ok+((Time.now.to_f-last_ok_time)*speed).to_i unless speed.nil? || bigs>3
     when 'SMALL'
       puts '<<<<<<<<<<<<<<<<<<<<<SMALL'
       hist.push :small
       bigs=0
       smalls+=1
-      if smalls==1 && !speed.nil?
-        est+=[((last_time-last_ok_time)*speed).to_i,10].min
+      case
+      when smalls<2
+        est+=5
+      when smalls<3
+        est+=8
+      when smalls<5
+        est+=12
       else
-        est+=[(smalls*4).to_i,10+rand(5)].min
+        est+=10
       end
+      est+=smalls
+      est=last_ok+((Time.now.to_f-last_ok_time)*speed).to_i unless speed.nil? || smalls>3
     when 'OK'
       puts '=====================OK'
       hist.push :ok
@@ -63,9 +74,11 @@ Net::HTTP.start(SERVER) {|h|
       end
       last_ok=est
       last_ok_time=Time.now.to_f
-      est+=rand()<0.5 ? 3 : 4
+      est+= speed.nil? ? 3 : speed.to_i
     end
     puts "tries: #{hist.count}, hit: #{hist.count{|x|x==:ok}}, rate: #{hist.count{|x|x==:ok}/hist.count.to_f}"
+    puts "--> #{est-last_est}"
     last_time=Time.now.to_f
+    last_est=est
   end
 }

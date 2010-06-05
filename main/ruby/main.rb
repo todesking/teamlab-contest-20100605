@@ -18,6 +18,7 @@ Net::HTTP.start(SERVER) {|h|
   bigs=0
   smalls=0
   hist=[:nil]*40
+  last_est=0
   while(true)
     puts 'est: '+est.to_s
     res=h.get(PATH+"?n="+est.to_s)
@@ -28,12 +29,14 @@ Net::HTTP.start(SERVER) {|h|
       puts '>>>>>>>>>>>>>>>>>>>>>BIG'
       hist.push :big
       bigs+=1
-      if smalls>0
-        est+=1
-      elsif bigs>3
+      if smalls>2
         est+=0
+      elsif bigs>4
+        est+=0
+      elsif bigs>2
+        est-=1
       else
-        est+=0
+        est-=1
       end
       smalls=0
     when 'SMALL'
@@ -41,14 +44,26 @@ Net::HTTP.start(SERVER) {|h|
       hist.push :small
       bigs=0
       smalls+=1
-      est+=[(smalls*4).to_i,10+rand(5)].min
+      case
+      when smalls<2
+        est+=5
+      when smalls<3
+        est+=8
+      when smalls<5
+        est+=12
+      else
+        est+=10
+      end
+      #est+=[(smalls*3.5).to_i,10+rand(5)].min
     when 'OK'
       puts '=====================OK'
       hist.push :ok
       bigs=0
       smalls=0
-      est+=rand()<0.5 ? 3 : 4
+      est+=rand()<0.5 ? 6 : 5
     end
     puts "tries: #{hist.count}, hit: #{hist.count{|x|x==:ok}}, rate: #{hist.count{|x|x==:ok}/hist.count.to_f}"
+    puts "--> #{est-last_est}"
+    last_est=est
   end
 }

@@ -24,7 +24,7 @@ Net::HTTP.start(SERVER) {|h|
       elsif bigs>3
         est+=0
       else
-        est+=2
+        est+=0
       end
       smalls=0
     when 'SMALL'

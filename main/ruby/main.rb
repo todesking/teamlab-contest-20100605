@@ -3,6 +3,15 @@ require 'net/http'
 SERVER='192.168.110.106'
 PATH='/tenkaichi/gamble.php'
 
+#    X
+#   XX
+#    X
+#    X
+#    X
+#    X
+#    X
+#    X
+#  XXXXX
 
 Net::HTTP.start(SERVER) {|h|
   est=ARGV[0].nil? ? 150 : ARGV[0].to_i

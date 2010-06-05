@@ -22,10 +22,10 @@ Net::HTTP.start(SERVER) {|h|
     puts 'est: '+est.to_s
     res=h.get(PATH+"?n="+est.to_s)
     next unless res.code=='200'
-    puts ' =>'+res.body
     hist.shift
     case res.body
     when 'BIG'
+      puts '>>>>>>>>>>>>>>>>>>>>>BIG'
       hist.push :big
       bigs+=1
       if smalls>0
@@ -37,11 +37,13 @@ Net::HTTP.start(SERVER) {|h|
       end
       smalls=0
     when 'SMALL'
+      puts '<<<<<<<<<<<<<<<<<<<<<SMALL'
       hist.push :small
       bigs=0
       smalls+=1
       est+=[(smalls*4).to_i,10+rand(5)].min
     when 'OK'
+      puts '=====================OK'
       hist.push :ok
       bigs=0
       smalls=0
